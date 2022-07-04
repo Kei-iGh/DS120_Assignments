@@ -1,0 +1,418 @@
+---
+title: "Homework_4_Part_1"
+author: "Kristina Ghahramanyan" # Please write your name and surname in the quotes
+date: "April 26, 2021"
+output: html_document
+---
+For this part of the homework assignment, you are required to submit both R Markdown and HTML files with your answer codes in it. When submitting, be sure that the .Rmd file works, so when we run it, there are no errors, and it will contain the same information as the HTML one. If you do not follow the above instructions, your mark will be lowered by 10%. 
+
+Problem 1.
+Load the built-in dataset "mtcars" by command data(mtcars). 
+Check the class of the dataset, and if it is not a dataframe, make it a dataframe. 
+Add to the dataframe a new factor type column "mpgfactor" to convert the values of column "mpg" to "high" when the value is greater than 22, "medium" when the value is greater than 12, else convert to "low" using ifelse() function (Hint: you are going to use nested ifelse() function. Search for it.). 
+You can do this in 3 lines of code.
+
+```{r}
+data(mtcars)
+typeof(mtcars) #it is a dataframe,each data frame is a list with class data.frame
+class(mtcars)
+
+mtcars$mpgfactor <- ifelse(mtcars$mpg > 22, 'high', #first line of code
+                           ifelse(mtcars$mpg < 22 & mtcars$mpg > 12, 'medium', 'low')) #second line of code
+mtcars #third line of code
+
+
+#Or with another solution
+#mtcars
+#mtcars$mpgfactor[mtcars$mpg>22] <- "high"
+#mtcars$mpgfactor[mtcars$mpg<22 & mtcars$mpg>12] <- "medium"
+#mtcars$mpgfactor[mtcars$mpg<12] <- "low"
+#mtcars
+```
+
+
+Problem 2.
+Generate a vector containing even numbers from 2 to 50 inclusive (Hint! use seq function). 
+Build a 5x5 matrix and populate it with the vector generated above in row-major order. 
+Check whether R stored it as a matrix. 
+Print the element at the intersection of row 3 and column 4.
+
+```{r}
+vec1 <- seq(2,50,by=2) 
+mat1 <- matrix(vec1, ncol=5, nrow=5, byrow = TRUE)
+is.matrix(mat1)
+cat(mat1[3,4])
+```
+
+Problem 3.
+Write a function that takes "x" as an argument and returns vector "y" containing all the divisors of "x". 
+Hint! x%%y expression shows the remainder when x is divided by y.
+
+
+```{r}
+vecofdivs <- function(x){
+  y <- vector("integer", x)
+  t <- x
+  for(i in seq_len(x)) {
+      if (x%%i == 0){
+        y[i] <- i
+      }
+  }
+  return(y[ y != 0 ])
+}
+vecofdivs(99)
+```
+
+Problem 4.
+Write a function to divide the below-given input list of ages between 0 and 70 into 4 groups.
+
+Baby Boomers - (50 to 70 years old]
+Generation X - (34 to 50 years old]
+Generation Y - (18 to 34 years old]
+Generation Z - 0 to 18 years old
+
+Return a named list with 4 elements where the element name is the group name and element value is the vector of ages in that group.
+Hint: you can use the python code from your first homework and rewrite it in R.
+```{r}
+ls<-c(18,29,3,14,69,10,1,58,52,23,24,5,65)
+
+               
+Baby_Boomers <- numeric(0) # making empty vectors, so we can append values to them later
+Generation_X <- numeric(0)
+Generation_Y <- numeric(0)
+Generation_Z <- numeric(0)
+
+func <- function(ls){
+  for (i in ls){
+    if (i <= 18){
+      Baby_Boomers <<- append(Baby_Boomers, i)
+    }
+    else if (i > 18 & i <= 34){
+      Generation_X <<- append(Generation_X, i)
+    }
+    else if (i > 34 & i <= 50){
+      Generation_Y <<- append(Generation_Y, i)
+    }
+    else
+      Generation_Z <<- append(Generation_Z, i)
+    
+  }
+}
+func(ls)
+Baby_Boomers
+Generation_X
+Generation_Y #No ages in that range, so the vector is empty
+Generation_Z
+
+
+gener <- c("Baby_Boomers", "Generation_X", "Generation_Y", "Generation_Z")
+b <- list(Baby_Boomers, Generation_X, Generation_Y, Generation_Z)
+names(b) <- c(gener)
+b
+```
+
+Problem 5.
+Write a while loop starting with x = 0. The loop prints all numbers up to 15 but it skips number 5.
+
+```{r}
+x = 0
+while(x < 15){
+    x <- x+1
+    if (x == 5) next
+    print(x)
+}
+```
+
+Problem 6.
+Write a repeat loop that exactly 10 times prints a random number between 0 and 1 using runif(1) function.
+
+```{r}
+n <- 0
+repeat {
+  print(runif(1))
+  n <- n + 1
+  if (n == 10){
+  break
+  }
+}
+```
+
+
+Problem 7.
+Use "foreach" library for this task.
+a. Create a new vector by combining the name with the corresponding surname based on vectors 'a' and 'b'.
+b. Filter vector "c_" to keep only the numbers that are divisible by 10. Hint: use foreach nesting operator and when condition. Make sure that the output is a vector.
+
+```{r}
+install.packages('foreach')
+library(foreach)
+# a.
+a<-c("Ani","Anna","Azat","Armen")
+b<-c("Abajyan","Alikhanyan","Asatryan","Amiryan")
+
+newvec <- foreach(i=4, .combine=rbind) %dopar% {"name" <- a
+                                                "surname" <- b
+                                                return(c(list(a,b)))}
+newvec
+
+# b.
+c_<-c(1:1000)
+newc_ <- foreach(i = c_, .combine = rbind) %do% {
+  if (i%%10 == 0){
+    return(c(i))
+    }
+}
+newc_
+```
+
+
+Problem 8.
+Create a multiplication table for the integers 1 to 12 using "foreach"" library.
+Change the index and column names by naming them "One", "Two",..., "Twelve".
+
+```{r}
+row_ <- c(1:12)
+col_ <- c(1:10)
+table <- foreach(i = row_, .combine = rbind) %:%
+              foreach(j = col_, .combine = c) %dopar% paste(i*j)
+table
+
+rownames(table) <- c("One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve")
+colnames(table) <- c("One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten")
+
+table
+```
+
+Problem 9.
+Write an R program to create a vector which contains 10 random integer values between -10 and +10 using sample() function.
+Using a method of subsetting get all positive numbers and afterward order them.
+
+```{r}
+vec = sample(-10:10, 10, replace=TRUE)
+print(vec)
+pos <- vec[vec>0]
+sort(pos)
+```
+
+Problem 10.
+Load dataset mtcars with data("mtcars") command.
+Print the dataset.
+a. Filter the dataframe by rows with "mpg" greater than or equal to 15 miles per gallon.
+b. Filter "mtcars" for rows with "cyl" less than "7" and "gear" equal to "4".
+c. Delete column "am".
+d. Use subsetting to make 0 all the values less than 3 in column "wt".
+e. Rename all the columns of mtcars dataset from 1 to 10 except column "hp". So "mpg" will become 1,"cyl" will become 2 and so on.
+```{r}
+data("mtcars")
+print(mtcars)
+#a.
+mtcars[mtcars$"mpg" >= 15 ,]
+
+#b.
+mtcars[mtcars$"cyl" < 7 & mtcars$"gear" == 4,]
+
+#c.
+mtcars$"am" <- NULL
+mtcars
+
+#d. 
+mtcars$"wt"[mtcars$"wt" < 3] <- 0
+mtcars
+
+#e.
+t <- c("1", "2", "3", "hp", "5", "6", "7", "8", "9", "10")
+colnames(mtcars) <- (t)
+mtcars
+
+```
+
+Problem 11.
+Write a function that replaces NaN values in a given vector with the mean of values that are not NaN call it giving vector a as input.
+
+```{r}
+
+a=c(5,5,0,NaN,5,NaN)
+
+func2 <- function(vector1){
+  ifelse(is.na(vector1),mean(vector1,na.rm = T),vector1)
+}  
+func2(a)
+```
+
+Problem 12.
+Given two vectors compute their Manhattan distance. Please search for it. The formula is very simple. 
+
+```{r}
+s1 <- c(1,2,3,4)
+s2 <- c(1,2,3,5)
+# the outcome should be |1-1|+|2-2|+|3-3|+|4-5| = 1
+
+func3 <- function(vect1, vect2){
+  vect3 <- abs(vect1 - vect2)
+  vect3 <- sum(vect3)
+}
+
+print(func3(s1, s2))
+```
+
+Problem 13.
+Action Heroes
+
+You are given two dataframes on movie heroes where the value in "pair" column is the same for two heroes that are a pair. Merge this two dataframes on "pair" column. After the merge operation compute the sum of heights of each pair. Use the merged dataframe to calculate the average height of men and women grouped by "gender.x" column(you must take into account both height columns). 
+
+
+```{r}
+library(dplyr)
+options(dplyr.summarise.inform = FALSE)
+
+data1 = data.frame(pair=c(1,2,3,4),
+                   gender = c("M", "M", "M","F"),
+                   name=c("Rnold","Rmen","Ragorn","Rtemida"),
+                  age = c(20, 60, 40, 180),
+                  height = c(280, 200, 9000, 210))
+
+data2 = data.frame(pair=c(1,2,3,4),
+                   gender = c("M", "M", "M","F"),
+                   name=c("Devito","Rmenuhi","Rwen","Res"),
+                   age = c(50, 40, 20, 190),
+                   height = c(210, 300, 9010, 210))
+
+
+
+
+#merging
+d3 <- merge(data1, data2, by = "pair")
+d3
+
+#finding sum of each pair
+vect_ = numeric(0)
+i <- 0
+while(i <= length(d3$"height.x")){
+  vect_ <- append(vect_, sum(d3$"height.x"[i], d3$"height.y"[i]))
+  i = i + 1
+}
+
+vect_ <- vect_[vect_ != 0]
+vect_
+
+#finding average of each pair
+d3 <- d3 %>% mutate(avg_by_each=rowMeans(cbind(d3$height.x, d3$height.y), na.rm=T))
+d3
+
+#calculating average height of men and women grouped by "gender.x" column
+d4 <- d3 %>% group_by(gender.x) %>% summarize(avg_by_gender = paste(mean(avg_by_each)))
+d4
+
+
+```
+
+Problem 14.
+R and a bottle of rum
+
+Your traitorous companions have thrown you out in the open sea, but luckily the waves have washed you to the shore of the mysterious treasure island. Imagine the treasure island as an NxN matrix (4<=N<=100) and you are at position (0,0) which is the upper left corner. Your duty is to reach the lower right corner of the island to obtain your treasure. However, your job is not easy because the mysterious temple gods have set up deadly traps for you. In the matrix, cells without traps are marked as 0 and cells with traps are marked as -1. Your goal is to check whether you can succesfully reach the treasures circumventing all the traps. You can only move left or down (no diagonal move).
+
+Note: Your starting cell and the ending cell cannot be traps; everything else can be a trap. 
+
+```{r}
+test <- rbind(c(0,0,-1,0),c(0,-1,0,0),c(-1,0,0,0),c(0,0,0,0))
+
+func4 <- function(mat){
+  mat[1,1] <- 1
+  range_ <- 2:length(mat[1,])
+  for (i in range_){
+    if (mat[i,1] != -1){
+      mat[i,1] = mat[i-1,1]
+    }
+    for (j in range_){
+      if (mat[1,j] != -1){
+        mat[1,j] = mat[1,j-1]
+      }
+      for (i in range_){
+        for (j in range_){
+          if (mat[i,j] != -1){
+            mat[i,j] = max(mat[i,j - 1], mat[i - 1,j])
+          }
+        }
+      }
+    }
+  }
+  return((mat[length(mat[1,]),length(mat[1,])] == 1))
+}
+
+mat1 = rbind(c(0, 0, 0, -1, 0),c(-1, 0, 0, -1, -1),c(0, 0, 0, 0, 0),c(-1, 0, -1, 0, -1),c(0, 0, -1, 0, 0))
+
+test
+func4(test)
+mat1
+func4(mat1)
+
+
+
+```
+
+Problem 15.
+R-achnides
+
+Gazillion R-achnides have filled your planet. The decade long scientific research has shown that mother R-achnide controls the soldiers using a specific movement pattern. Your goal is to repeat the movemenet pattern and take the control of R-achnides to save your plannet. 
+
+Given a triangular 5x5 matrix, print the values of the matrix in a moving pattern presented in [this image](https://cglab.ca/~discmath/figures/function-rationalscountable.png).
+
+```{r}
+test2 <- rbind(c(1,2,3,4,5),c(1,2,3,4,0),c(1,2,3,0,0),c(1,2,0,0,0),c(1,0,0,0,0))
+
+
+#we need the values in indices:
+#the pattern in those  
+#positions is [i,j],[j,i]
+# [1,1],[2,1],            [1,2],
+# [1,3],[3,1],            [4,1],
+# [3,2],[2,3],            [1,4],
+# [1,5],[5,1],            [5,2],
+# [4,3],[3,4],            [2,5],
+# [3,5],[5,3],            [5,4],
+
+
+#range1 <- 1:length(test2[1,])
+#v <- numeric(0)
+#for (i in range1){
+#  for (j in range1){
+#    v <- append(v, test2[i,j],test2[i,j+2],test2[i,j+1]......)
+# ......   
+#  }
+#}
+#
+
+vec <- rbind(c(test2[1,1],test2[2,1],test2[1,2]),
+             c(test2[1,3],test2[3,1],test2[4,1]),
+             c(test2[3,2],test2[2,3],test2[1,4]),
+             c(test2[1,5],test2[5,1],test2[5,2]),
+             c(test2[4,3],test2[3,4],test2[2,5]),
+             c(test2[3,5],test2[5,3],test2[5,4]))
+ vec
+
+
+```
+
+
+## Optional Problems
+Problem 16.
+
+Generate even numbers form [0,10] using only 5 characters of code.
+
+```{r}
+
+
+```
+
+Problem 17.
+Michael Jackson
+
+Michael Jackson is dancing on integer number line at position A (...,-1,0,1,2,3,...) with his stamina at level B. He can use two dance moves. The first one is the moon walk which decreases his position by 1 and decreases his stamina by 2. He also can use the MJ spin which multiplies his position by -1 and decreases his stamina by 1. Given that Micheal is at position A and has stamina B, what is the number of unique positions he can get into by using at most all of his stamina.
+
+Note: -10^9 <= A <= 10^9 and 1<=B<=10^9
+
+```{r}
+
+```
+
+

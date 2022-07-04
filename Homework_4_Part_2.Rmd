@@ -1,0 +1,217 @@
+---
+title: "Homework 4 Part 2"
+author: "Ghahramanyan Kristina"
+date: "May 3, 2021"
+output: html_document
+---
+
+For this part of the homework assignment, you are required to submit both R Markdown and HTML files with your answer codes in it. When submitting, be sure that the .Rmd file works, so when we run it, there are no errors, and it will contain the same information as the HTML one. If you do not follow the above instructions, your mark will be lowered by 10%.
+
+
+Problem 1.
+For this task you should use functions from apply family (apply,lapply,sapply,...)
+a. Find the class of each element of list1.
+b. Use an appropriate function on Element2 to get the mean of each column.
+c. Find out which column of built-in "iris" dataset is not numeric using sapply then identify the levels of the non-numeric column (hint: 'levels' function).
+
+```{r}
+list1 <- list(Element1 = c(1:5, 7:3), Element2=matrix(1:6, nrow=2))
+# Start code here #
+#a
+lapply(list1,class)
+#b
+apply(matrix(unlist(list1[2]), ncol = 3), 2, mean)
+#c
+library(datasets)
+data(iris)
+sapply(iris[0,], class)
+levels(iris$Species)
+# End code here #
+```
+
+Problem 2.
+a. Replicate the  vector given in order to generate the following sequence:
+1,1,1,2,2,2,3,3,3,4,4,4
+Hint: use "each" argument of "rep" function.
+
+```{r}
+x <- c(1,2,3,4)
+# Start code here #
+rep(x, times = 1, each = 3)
+# End code here #
+```
+
+b.
+Given below two vectors, use mapply() function to calculate the square root of x^2+y^2, where x and y are the corresponding elements of two vectors.
+
+```{r}
+a<-c(a =  3, b = 5, c = 6)
+b<-c(A = 4, B = 12, C = 8)
+# Start code here #
+mapply(sqrt, a^2+b^2)
+# End code here #
+```
+
+Problem 3.
+Use built-in "mtcars" dataset for this task.
+Calculate the median for each column grouped by Transmission('am' column).
+```{r}
+# Start code here #
+library("dplyr")
+df <- mtcars %>% group_by(am)
+apply(df, 2, median)
+# End code here #
+```
+
+Problem 4.
+a.
+Convert below given strings to Date class.
+Calculate the time difference between these two dates in days and in weeks.
+Add the time difference in days to the date which was earlier (x) and check whether this new date is equal to the later date (y).
+
+```{r}
+x <- "11-March-2012" 
+y <- "04/25/2018 11:59:59"
+# Start code here #
+newx <- as.Date(x,format="%d-%B-%Y")
+newx
+newy <- as.Date(y,format="%m/%d/%Y %I:%M:%S")
+newy
+
+indays <- difftime(newy, newx)
+indays
+inweeks <- difftime(newy, newx, units = "weeks")
+inweeks
+
+newdate <- indays + newx
+newdate
+newdate == newy
+# End code here #
+```
+
+b.
+Get current time of your system.
+Convert it to POSIXlt.
+Print weekday of current date.
+```{r}
+# Start code here #
+Sys.time()
+
+formated <- as.POSIXlt(Sys.time())
+class(formated)
+
+weekdays(formated)
+# End code here #
+```
+
+
+Problem 5.
+Read "exam.csv" file as a dataframe. Spread the dataframe in a way that values in "Exam" column become columns with values from "Score" column. Write the output in a txt file.
+```{r}
+# Start code here #
+#install.packages("tidyr")
+library("tidyr")
+data <- read.csv("exams.csv")
+data2 <- tidyr:::spread(data, Exam, Score)
+data2
+write.table(data2, file = "data2.txt", sep = "\t")
+# End code here #
+```
+
+Problem 6.
+Read "census.csv".
+Gather the columns named with months of the year to create two columns,"month" and "amount", assigning the result to "census2".
+Sort "census2" by column "YEAR". 
+Save the output in json file, using write_json() function from "jsonlite" package.
+```{r}
+# Start code here #
+#install.packages("jsonlite")
+library(jsonlite)
+
+cenc <- read.csv("census.csv")
+census2 <- cenc %>% gather(key = "month", value ="amount", -YEAR)
+head(census2)
+tail(census2)
+
+census2 <- census2[order(census2$YEAR),]
+head(census2)
+tail(census2)
+write_json(census2, "census2.json")
+# End code here #
+```
+
+Problem 7.
+Read "mobile.csv" file and convert it to dataframe.
+With the use of dplyr package, filter it in a way that all prices are greater or equal to 50$ and brands are among the following:
+"APPLE","SAMSUNG","HUAWEI","BlACKBERRY". 
+NOTE: you must change brand names into above-given format.
+
+```{r}
+# Start code here #
+mobile <- read.csv("mobile.csv")
+head(mobile)
+filtered <- mobile %>% filter(Price >= 50  & (Brand.Name == "apple " | Brand.Name == "samsung " | Brand.Name == "huawei " | Brand.Name == "blackberry "))
+head(filtered)
+# End code here #
+```
+
+Problem 8.
+Use the initial dataframe of "mobile.csv" from Problem 7 to calculate the number of cellphones for each brand being sold and arrange it in a descending order.
+```{r}
+# Start code here #
+head(mobile)
+newmobile <- mobile %>% group_by(Brand.Name) %>% summarise(Sold = n())
+newmobile <- newmobile[order(newmobile$Sold),decreasing = TRUE]
+head(newmobile)
+# End code here #
+```
+
+Problem 9.
+Use the initial dataframe of "mobile.csv" from Problem 7 to calculate the average rating and average price of each brand. Arrange both in an ascending order.
+```{r}
+# Start code here #
+head(mobile)
+newmobile2 <- mobile %>% group_by(Brand.Name) %>% summarise(AverageRating = mean(Rating), AveragePrice = mean(Price))
+newmobile2 <- as.data.frame(newmobile2)
+head(newmobile2[order(-newmobile2$AverageRating,-newmobile2$AveragePrice),])
+# End code here #
+```
+
+Problem 10.
+Create a generic function called "printName".
+Create a default method which outputs "Not a name" for unknown classes.
+Create method "PName" which splits by space the input in form of "Name Surname" into atomic vector, names the vector with c("name","surname") vector and returns the named atomic vector.
+Create constructor function "NS" which takes as an input name and surname, outputs them in form of "Name Surname" and changes the class of output to "PName".
+Create an object of the "PName" class using "NS" constructor function with input name "Andrew" and surname "Ng".
+Call printName method on that object.
+
+```{r}
+# Start code here #
+library("stringr")
+printName <- function(name) UseMethod("printName")
+printName.default <- function(name) "Not a name"
+printName.PName <- function(name){
+  vec <- c(str_extract_all(name, "[a-zA-Z]+", simplify = TRUE))
+  names(vec) <- c("name", "surname")
+  return(vec)
+}
+
+NS <- function(name, surname){
+  out <- paste(name, surname)
+  class(out) <- "PName"
+  invisible(out)
+}
+
+obj <- NS("Andrew", "Ng")
+printName(obj)
+# End code here #
+```
+
+
+
+
+
+
+
+
+
